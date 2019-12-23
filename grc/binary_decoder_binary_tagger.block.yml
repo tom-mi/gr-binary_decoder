@@ -1,43 +1,28 @@
 id: binary_decoder_binary_tagger
-label: binary_tagger
-category: '[binary_decoder]'
+label: Binary Tagger
+category: '[Binary Decoder]'
 
 templates:
   imports: import binary_decoder
   make: binary_decoder.binary_tagger(${key}, ${max_quiet_samples})
 
-#  Make one 'parameters' list entry for every Parameter you want settable from the GUI.
-#     Sub-entries of dictionary:
-#     * id (makes the value accessible as \$keyname, e.g. in the make entry)
-#     * label
-#     * dtype 
 parameters:
-- id: ...
-  label: ...
-  dtype: ...
-- id: ...
-  label: ...
-  dtype: ...
+- id: key
+  label: key
+  dtype: string
+  default: binary_transmission
+- id: max_quiet_samples
+  label: max_quiet_samples
+  dtype: int
 
-#  Make one 'inputs' list entry per input. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * domain
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
 inputs:
-- label: ...
-  domain: ...
-  dtype: ...
-  vlen: ...
+- label: in
+  dtype: byte
+  vlen: 1
 
-#  Make one 'outputs' list entry per output. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
-- label: ...
-  domain: ...
-  dtype: ... #!-- e.g. int, float, complex, byte, short, xxx_vector, ...--
+outputs:
+- label: out
+  dtype: byte #!-- e.g. int, float, complex, byte, short, xxx_vector, ...--
+  vlen: 1
 
 file_format: 1
