@@ -45,8 +45,18 @@ class binary_tagger(gr.sync_block):
         in0 = input_items[0]
         out = output_items[0]
 
-        offset = self.nitems_written(0)
+        if not self._can_input_be_skipped(in0):  # shortcut to skip empty inputs for better performance
+            self._scan_for_transmissions(in0)
 
+        out[:] = in0
+
+        return len(output_items[0])
+
+    def _can_input_be_skipped(self, in0):
+        return not self._is_transmission and numpy.all(in0 == 0)
+
+    def _scan_for_transmissions(self, in0):
+        offset = self.nitems_written(0)
         for i, value in enumerate(in0):
             position = offset + i
             if value != 0:
@@ -59,7 +69,3 @@ class binary_tagger(gr.sync_block):
                 if position - self._position_of_last_signal > self._max_quiet_samples:
                     self._is_transmission = False
                     self.add_item_tag(0, position, pmt.string_to_symbol(self._key), pmt.to_pmt(False))
-
-        out[:] = in0
-
-        return len(output_items[0])
