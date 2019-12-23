@@ -32,7 +32,8 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-    binary_tagger.py DESTINATION ${GR_PYTHON_DIR}/binary_decoder
+    binary_tagger.py
+    binary_stream_to_vector.py DESTINATION ${GR_PYTHON_DIR}/binary_decoder
 )
 
 ########################################################################
@@ -43,3 +44,4 @@ include(GrTest)
 set(GR_TEST_TARGET_DEPS gnuradio-binary_decoder)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 GR_ADD_TEST(qa_binary_tagger ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_tagger.py)
+GR_ADD_TEST(qa_binary_stream_to_vector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_stream_to_vector.py)
