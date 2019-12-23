@@ -18,21 +18,14 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 #
-from dataclasses import dataclass
 
 import pmt
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 from binary_tagger import binary_tagger
+from qa_common import ExpectedTag
 
 TEST_KEY = 'test_key'
-
-
-@dataclass
-class ExpectedTag(object):
-    offset: int
-    key: str
-    value: object
 
 
 class qa_binary_tagger(gr_unittest.TestCase):
