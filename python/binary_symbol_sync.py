@@ -18,8 +18,6 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 #
-
-
 import numpy
 from gnuradio import gr
 
@@ -73,24 +71,23 @@ class binary_symbol_sync(gr.basic_block):
         def _skip_empty():
             if numpy.all(in0[relative_position:] == 0):
                 return len(in0)
-            return numpy.argmax(in0[relative_position:] != 0)
+            return relative_position + numpy.argmax(in0[relative_position:] != 0)
 
         def _lock():
             self._is_locked = True
             self._current_samples_per_symbol = self._samples_per_symbol
 
         def _determine_current_symbol_length():
-            best_symbol_length = None
-            best_error = self._max_deviation * 2
-            for i in range(self._min_samples_per_symbol, self._max_samples_per_symbol + 1):
-                if in0[relative_position + i - 1] == 0 and in0[relative_position + i] != 0:
-                    error = numpy.abs(i - self._current_samples_per_symbol)
-                    if error < best_error:
-                        best_error = error
-                        best_symbol_length = i
-            if best_symbol_length is not None:
-                self._update_current_samples_per_symbol(best_symbol_length)
-                return best_symbol_length
+            candidate_samples_per_symbol = int(self._current_samples_per_symbol + 0.5)
+            for i in range(4 * self._max_deviation):  # TODO check if enough
+                candidate_samples_per_symbol += ((-1) ** i) * i
+                if not self._min_samples_per_symbol <= candidate_samples_per_symbol <= self._max_samples_per_symbol:
+                    continue
+                offset = relative_position + candidate_samples_per_symbol
+                if self._is_possible_start_of_symbol(in0[offset -1], in0[offset]):
+                    self._update_current_samples_per_symbol(candidate_samples_per_symbol)
+                    return candidate_samples_per_symbol
+
             return int(self._current_samples_per_symbol)
 
         def _send_symbol(length):
@@ -121,6 +118,9 @@ class binary_symbol_sync(gr.basic_block):
 
         self.consume(0, relative_position)  # self.consume_each(len(input_items[0]))
         return symbols_written * self._output_samples_per_symbol
+
+    def _is_possible_start_of_symbol(self, previous_sample, current_sample):
+        return previous_sample == 0 and current_sample != 0
 
     def _update_current_samples_per_symbol(self, new_value):
         alpha = self._clock_smoothing_factor

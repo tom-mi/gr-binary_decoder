@@ -139,6 +139,32 @@ class qa_binary_symbol_sync(BinaryBaseTest):
         # then
         self.assertEqual(self.dst.data(), (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0))
 
+    def test_handles_large_amounts_of_zeros(self):
+        # given
+        one = (1, 1, 0, 0, 0)
+        zero = (0, 0, 0, 0, 0)
+        data = zero * 100_000 + one * 10 + zero * 100_000 + one * 10 + zero * 100_000
+        self._setup_graph(data, samples_per_symbol=5, max_deviation=1, max_zero_symbols=2, output_samples_per_symbol=1)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (1,) * 10 + (0,) * 3 + (1,) * 10 + (0,) * 3)
+
+    def test_handles_large_amounts_of_data(self):
+        # given
+        one = (1, 1, 0, 0, 0)
+        zero = (0, 0, 0, 0, 0)
+        data = zero * 100_000 + one * 100_000 + zero * 100_000 + one * 100_000 + zero * 100_000
+        self._setup_graph(data, samples_per_symbol=5, max_deviation=1, max_zero_symbols=2, output_samples_per_symbol=1)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (1,) * 100_000 + (0,) * 3 + (1,) * 100_000 + (0,) * 3)
+
     def _setup_graph(self, src_data, samples_per_symbol=10, clock_smoothing_factor=0.5,
                      max_deviation=2, max_zero_symbols=5, output_samples_per_symbol=1):
         uut = binary_symbol_sync(
