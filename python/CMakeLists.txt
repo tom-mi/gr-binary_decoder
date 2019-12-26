@@ -33,7 +33,8 @@ GR_PYTHON_INSTALL(
     FILES
     __init__.py
     binary_tagger.py
-    binary_symbol_sync.py DESTINATION ${GR_PYTHON_DIR}/binary_decoder
+    binary_symbol_sync.py
+    binary_ppm_decoder.py DESTINATION ${GR_PYTHON_DIR}/binary_decoder
 )
 
 ########################################################################
@@ -45,3 +46,4 @@ set(GR_TEST_TARGET_DEPS gnuradio-binary_decoder)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 GR_ADD_TEST(qa_binary_tagger ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_tagger.py)
 GR_ADD_TEST(qa_binary_symbol_sync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_symbol_sync.py)
+GR_ADD_TEST(qa_binary_ppm_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_ppm_decoder.py)

@@ -20,5 +20,6 @@
 
 install(FILES
     binary_decoder_binary_tagger.block.yml
-    binary_decoder_binary_symbol_sync.block.yml DESTINATION share/gnuradio/grc/blocks
+    binary_decoder_binary_symbol_sync.block.yml
+    binary_decoder_binary_ppm_decoder.block.yml DESTINATION share/gnuradio/grc/blocks
 )

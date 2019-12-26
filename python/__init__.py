@@ -34,4 +34,5 @@ except ImportError:
 # import any pure python here
 from .binary_tagger import binary_tagger
 from .binary_symbol_sync import binary_symbol_sync
+from .binary_ppm_decoder import binary_ppm_decoder
 #
