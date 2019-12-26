@@ -33,5 +33,4 @@ except ImportError:
 
 # import any pure python here
 from .binary_tagger import binary_tagger
-from .binary_stream_to_vector import binary_stream_to_vector
 #

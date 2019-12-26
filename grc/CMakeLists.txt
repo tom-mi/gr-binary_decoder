@@ -19,6 +19,5 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    binary_decoder_binary_tagger.block.yml
-    binary_decoder_binary_stream_to_vector.block.yml DESTINATION share/gnuradio/grc/blocks
+    binary_decoder_binary_tagger.block.yml DESTINATION share/gnuradio/grc/blocks
 )
