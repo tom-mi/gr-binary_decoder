@@ -85,13 +85,11 @@ class binary_symbol_sync(gr.basic_block):
             for i in range(self._min_samples_per_symbol, self._max_samples_per_symbol + 1):
                 if in0[relative_position + i - 1] == 0 and in0[relative_position + i] != 0:
                     error = numpy.abs(i - self._current_samples_per_symbol)
-                    print(f'... i={i} error={error}')
                     if error < best_error:
                         best_error = error
                         best_symbol_length = i
             if best_symbol_length is not None:
                 self._update_current_samples_per_symbol(best_symbol_length)
-                print(f'found i={best_symbol_length}, avg={self._current_samples_per_symbol}')
                 return best_symbol_length
             return int(self._current_samples_per_symbol)
 
@@ -104,13 +102,11 @@ class binary_symbol_sync(gr.basic_block):
             for i in range(self._output_samples_per_symbol):
                 out0[symbol_offset + i] = in0[relative_position + int(length * i / self._output_samples_per_symbol)]
 
-        print(f'pos={relative_position} len(in0)={len(in0)} len(out0)={len(out0)}')
         while (relative_position + self._max_samples_per_symbol < len(in0)
                and (symbols_written + 1) * self._output_samples_per_symbol <= len(out0)):
             if not self._is_locked:
                 if in0[relative_position] == 0:
                     relative_position = _skip_empty()
-                    print(f'skipping to pos={relative_position}')
                 else:
                     _lock()
             else:
@@ -119,15 +115,11 @@ class binary_symbol_sync(gr.basic_block):
                     self._zero_symbols = 0
                 else:
                     length = _determine_current_symbol_length()
-                    print(f'locked, length={length}')
                     _send_symbol(length)
                     symbols_written += 1
                     relative_position += length
 
-        # output_items[0][:] = input_items[0]
         self.consume(0, relative_position)  # self.consume_each(len(input_items[0]))
-        print(f'consumed {relative_position} samples, symbols written: {symbols_written}')
-        print('wrote samples', symbols_written * self._output_samples_per_symbol)
         return symbols_written * self._output_samples_per_symbol
 
     def _update_current_samples_per_symbol(self, new_value):
