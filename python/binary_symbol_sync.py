@@ -29,13 +29,20 @@ class binary_symbol_sync(gr.basic_block):
     docstring for block binary_symbol_sync
     """
 
-    def __init__(self, samples_per_symbol=10, max_deviation=2, max_zero_symbols=10, output_samples_per_symbol=1):
+    def __init__(self,
+                 samples_per_symbol=10,
+                 max_deviation=2,
+                 clock_smoothing_factor=0.5,
+                 max_zero_symbols=10,
+                 output_samples_per_symbol=1,
+                 ):
         gr.basic_block.__init__(self,
                                 name="binary_symbol_sync",
                                 in_sig=[numpy.int8, ],
                                 out_sig=[numpy.int8, ])
         self._samples_per_symbol = samples_per_symbol
         self._max_deviation = max_deviation
+        self._clock_smoothing_factor = clock_smoothing_factor
         self._max_zero_symbols = max_zero_symbols
         self._output_samples_per_symbol = output_samples_per_symbol
 
@@ -76,14 +83,14 @@ class binary_symbol_sync(gr.basic_block):
             best_symbol_length = None
             best_error = self._max_deviation * 2
             for i in range(self._min_samples_per_symbol, self._max_samples_per_symbol + 1):
-                if in0[relative_position + i-1] == 0 and in0[relative_position + i] != 0:
+                if in0[relative_position + i - 1] == 0 and in0[relative_position + i] != 0:
                     error = numpy.abs(i - self._current_samples_per_symbol)
                     print(f'... i={i} error={error}')
                     if error < best_error:
                         best_error = error
                         best_symbol_length = i
             if best_symbol_length is not None:
-                self._current_samples_per_symbol = (self._current_samples_per_symbol + best_symbol_length) / 2
+                self._update_current_samples_per_symbol(best_symbol_length)
                 print(f'found i={best_symbol_length}, avg={self._current_samples_per_symbol}')
                 return best_symbol_length
             return int(self._current_samples_per_symbol)
@@ -122,3 +129,7 @@ class binary_symbol_sync(gr.basic_block):
         print(f'consumed {relative_position} samples, symbols written: {symbols_written}')
         print('wrote samples', symbols_written * self._output_samples_per_symbol)
         return symbols_written * self._output_samples_per_symbol
+
+    def _update_current_samples_per_symbol(self, new_value):
+        alpha = self._clock_smoothing_factor
+        self._current_samples_per_symbol = alpha * new_value + (1 - alpha) * self._current_samples_per_symbol

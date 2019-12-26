@@ -115,6 +115,17 @@ class qa_binary_symbol_sync(BinaryBaseTest):
         # then
         self.assertEqual(self.dst.data(), (1, 1, 1, 1, 0, 0, 0, 0, 1, 1))
 
+    def test_handles_lock_to_drifted_clock_with_custom_smoothing_factor(self):
+        # given
+        data = (1, 1, 0, 0, 0, 0, 0, 0) * 2 + (0, 0, 0, 0, 0, 0, 0, 0) * 4 + (1, 1, 0, 0, 0, 0, 0, 0) * 2 + (0,) * 10
+        self._setup_graph(data, samples_per_symbol=10, max_deviation=3, clock_smoothing_factor=0.9, max_zero_symbols=4)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (1, 1, 0, 0, 0, 0, 1, 1))
+
     def test_handles_multiple_transmissions(self):
         # given
         one = (1, 1, 0, 0, 0)
@@ -128,11 +139,12 @@ class qa_binary_symbol_sync(BinaryBaseTest):
         # then
         self.assertEqual(self.dst.data(), (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0))
 
-    def _setup_graph(self, src_data, samples_per_symbol=10, max_deviation=2, max_zero_symbols=5,
-                     output_samples_per_symbol=1):
+    def _setup_graph(self, src_data, samples_per_symbol=10, clock_smoothing_factor=0.5,
+                     max_deviation=2, max_zero_symbols=5, output_samples_per_symbol=1):
         uut = binary_symbol_sync(
             samples_per_symbol=samples_per_symbol,
             max_deviation=max_deviation,
+            clock_smoothing_factor=clock_smoothing_factor,
             max_zero_symbols=max_zero_symbols,
             output_samples_per_symbol=output_samples_per_symbol,
         )
