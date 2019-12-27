@@ -111,7 +111,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
         # then
         self.assertEqual(self.dst.data(), (0, 1))
-        self._assert_tags([ExpectedTag(0, 'packet_length', 2)])
+        self._assert_tags([ExpectedTag(0, 'packet_len', 2)])
 
     def test_receive_multiple_symbols_with_pause(self):
         # given
@@ -123,7 +123,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
         # then
         self.assertEqual(self.dst.data(), (1, 0))
-        self._assert_tags([ExpectedTag(0, 'packet_length', 1), ExpectedTag(1, 'packet_length', 1)])
+        self._assert_tags([ExpectedTag(0, 'packet_len', 1), ExpectedTag(1, 'packet_len', 1)])
 
     def test_receive_multiple_symbols_with_timing_deviation(self):
         # given
@@ -205,12 +205,12 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
         # then
         self.assertEqual(self.dst.data(), (1,) * 5 + (0,) * 5)
         self._assert_tags([
-            ExpectedTag(0, 'packet_length', 5),
-            ExpectedTag(5, 'packet_length', 1),
-            ExpectedTag(6, 'packet_length', 1),
-            ExpectedTag(7, 'packet_length', 1),
-            ExpectedTag(8, 'packet_length', 1),
-            ExpectedTag(9, 'packet_length', 1),
+            ExpectedTag(0, 'packet_len', 5),
+            ExpectedTag(5, 'packet_len', 1),
+            ExpectedTag(6, 'packet_len', 1),
+            ExpectedTag(7, 'packet_len', 1),
+            ExpectedTag(8, 'packet_len', 1),
+            ExpectedTag(9, 'packet_len', 1),
         ])
 
     def test_receive_large_number_of_symbols(self):
@@ -234,7 +234,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
         # then
         self.assertEqual(self.dst.data(), (1,) * 5)
-        self._assert_tags([ExpectedTag(0, 'packet_length', 4), ExpectedTag(4, 'packet_length', 1)])
+        self._assert_tags([ExpectedTag(0, 'packet_len', 4), ExpectedTag(4, 'packet_len', 1)])
 
     def _setup_graph(self, src_data, samples_per_pulse=3, samples_per_gap=(5, 9),
                      max_deviation=0, max_packet_length=64):

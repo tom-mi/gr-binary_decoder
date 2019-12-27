@@ -27,7 +27,7 @@ import typing
 import pmt
 from gnuradio import gr
 
-PACKET_LENGTH_TAG_KEY = 'packet_length'
+PACKET_LENGTH_TAG_KEY = 'packet_len'
 
 
 class binary_ppm_decoder(gr.basic_block):
