@@ -22,12 +22,13 @@
 from gnuradio import gr_unittest
 
 from binary_ppm_decoder import binary_ppm_decoder
-from qa_common import BinaryBaseTest
+from qa_common import BinaryBaseTest, ExpectedTag
 
 PULSE = (1,) * 3
 SHORT_GAP = (0,) * 5
 LONG_GAP = (0,) * 9
 ZERO = (0,)
+TRAILING_ZEROS = LONG_GAP + ZERO
 TRANSMISSION_BREAK = (0,) * 15
 
 
@@ -48,6 +49,8 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
             ({'max_deviation': 2, 'samples_per_gap': (3, 14, 7)},
              'difference between any 2 values in samples_per_gap must not be smaller than 2 * max_deviation'),
             ({'samples_per_gap': (3,)}, 'samples_per_gap must have at least two elements'),
+            ({'max_packet_length': 0}, 'max_packet_length must be a positive integer'),
+            ({'max_packet_length': 1.}, 'max_packet_length must be a positive integer'),
         ]:
             with self.subTest(f'{parameters} -> {message}'):
                 with self.assertRaises(ValueError) as error:
@@ -67,7 +70,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def test_receive_single_symbol(self):
         # given
-        data = ZERO + PULSE + SHORT_GAP + PULSE + ZERO
+        data = ZERO + PULSE + SHORT_GAP + PULSE + TRAILING_ZEROS
         self._setup_graph(data)
 
         # when
@@ -78,7 +81,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def test_receive_multiple_symbols(self):
         # given
-        data = ZERO + PULSE + LONG_GAP + PULSE + SHORT_GAP + PULSE + LONG_GAP + PULSE + ZERO
+        data = ZERO + PULSE + LONG_GAP + PULSE + SHORT_GAP + PULSE + LONG_GAP + PULSE + TRAILING_ZEROS
         self._setup_graph(data)
 
         # when
@@ -89,7 +92,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def test_receive_multiple_symbols_with_more_than_two_symbol_types(self):
         # given
-        data = ZERO + PULSE + (0,) * 8 + PULSE + (0,) * 5 + PULSE + (0,) + PULSE + ZERO
+        data = ZERO + PULSE + (0,) * 8 + PULSE + (0,) * 5 + PULSE + (0,) + PULSE + TRAILING_ZEROS
         self._setup_graph(data, samples_per_gap=(1, 2, 3, 4, 5, 6, 7, 8))
 
         # when
@@ -98,9 +101,21 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
         # then
         self.assertEqual(self.dst.data(), (7, 4, 0))
 
+    def test_adds_length_tag_after_transmission_is_finished(self):
+        # given
+        data = ZERO + PULSE + SHORT_GAP + PULSE + LONG_GAP + PULSE + TRANSMISSION_BREAK
+        self._setup_graph(data)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (0, 1))
+        self._assert_tags([ExpectedTag(0, 'packet_length', 2)])
+
     def test_receive_multiple_symbols_with_pause(self):
         # given
-        data = ZERO + PULSE + LONG_GAP + PULSE + TRANSMISSION_BREAK + PULSE + SHORT_GAP + PULSE + ZERO
+        data = ZERO + PULSE + LONG_GAP + PULSE + TRANSMISSION_BREAK + PULSE + SHORT_GAP + PULSE + TRAILING_ZEROS
         self._setup_graph(data)
 
         # when
@@ -108,10 +123,12 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
         # then
         self.assertEqual(self.dst.data(), (1, 0))
+        self._assert_tags([ExpectedTag(0, 'packet_length', 1), ExpectedTag(1, 'packet_length', 1)])
 
     def test_receive_multiple_symbols_with_timing_deviation(self):
         # given
-        data = ZERO + PULSE + (1,) + LONG_GAP + PULSE + SHORT_GAP + (0,) + PULSE + (0, 0, 0, 0) + PULSE + ZERO
+        data = ZERO + PULSE + (1,) + LONG_GAP + PULSE + SHORT_GAP + (0,) + PULSE + (0, 0, 0, 0) + PULSE + \
+               TRAILING_ZEROS + ZERO
         self._setup_graph(data, max_deviation=1)
 
         # when
@@ -122,7 +139,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def test_ignores_symbol_after_invalid_start_pulse(self):
         # given
-        data = ZERO + (1,) + LONG_GAP + PULSE + SHORT_GAP + PULSE + ZERO
+        data = ZERO + (1,) + LONG_GAP + PULSE + SHORT_GAP + PULSE + TRAILING_ZEROS + ZERO
         self._setup_graph(data, max_deviation=1)
 
         # when
@@ -133,7 +150,29 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def test_ignores_symbol_after_invalid_end_pulse(self):
         # given
-        data = ZERO + PULSE + LONG_GAP + PULSE + SHORT_GAP + (1,) * 5 + ZERO
+        data = ZERO + PULSE + LONG_GAP + PULSE + SHORT_GAP + (1,) * 5 + TRAILING_ZEROS + ZERO
+        self._setup_graph(data, max_deviation=1)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (1,))
+
+    def test_sends_packet_after_sufficiently_long_end_gap(self):
+        # given
+        data = ZERO + PULSE + LONG_GAP + PULSE + TRAILING_ZEROS + ZERO
+        self._setup_graph(data, max_deviation=1)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (1,))
+
+    def test_sends_packet_after_sufficiently_long_end_pulse(self):
+        # given
+        data = ZERO + PULSE + LONG_GAP + PULSE + SHORT_GAP + PULSE + (1,) * 2
         self._setup_graph(data, max_deviation=1)
 
         # when
@@ -144,7 +183,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def test_ignores_symbol_with_invalid_gap_length(self):
         # given
-        data = ZERO + PULSE + (0,) * 7 + PULSE + SHORT_GAP + PULSE + ZERO
+        data = ZERO + PULSE + (0,) * 7 + PULSE + SHORT_GAP + PULSE + TRAILING_ZEROS + ZERO
         self._setup_graph(data, max_deviation=1)
 
         # when
@@ -165,10 +204,18 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
         # then
         self.assertEqual(self.dst.data(), (1,) * 5 + (0,) * 5)
+        self._assert_tags([
+            ExpectedTag(0, 'packet_length', 5),
+            ExpectedTag(5, 'packet_length', 1),
+            ExpectedTag(6, 'packet_length', 1),
+            ExpectedTag(7, 'packet_length', 1),
+            ExpectedTag(8, 'packet_length', 1),
+            ExpectedTag(9, 'packet_length', 1),
+        ])
 
     def test_receive_large_number_of_symbols(self):
         # given
-        data = ZERO + (PULSE + LONG_GAP) * 100_000 + PULSE + ZERO
+        data = ZERO + (PULSE + LONG_GAP) * 100_000 + PULSE + TRAILING_ZEROS
         self._setup_graph(data)
 
         # when
@@ -177,12 +224,25 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
         # then
         self.assertEqual(self.dst.data(), (1,) * 100_000)
 
+    def test_packet_exceeding_max_packet_length(self):
+        # given
+        data = ZERO + (PULSE + LONG_GAP) * 5 + PULSE + TRAILING_ZEROS
+        self._setup_graph(data, max_packet_length=4)
+
+        # when
+        self.tb.run()
+
+        # then
+        self.assertEqual(self.dst.data(), (1,) * 5)
+        self._assert_tags([ExpectedTag(0, 'packet_length', 4), ExpectedTag(4, 'packet_length', 1)])
+
     def _setup_graph(self, src_data, samples_per_pulse=3, samples_per_gap=(5, 9),
-                     max_deviation=0):
+                     max_deviation=0, max_packet_length=64):
         uut = binary_ppm_decoder(
             samples_per_pulse=samples_per_pulse,
             samples_per_gap=samples_per_gap,
             max_deviation=max_deviation,
+            max_packet_length=max_packet_length,
         )
         self._setup_graph_with_uut(src_data, uut)
 

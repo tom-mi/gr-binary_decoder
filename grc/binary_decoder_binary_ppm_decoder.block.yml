@@ -4,7 +4,7 @@ category: '[Binary Decoder]'
 
 templates:
   imports: import binary_decoder
-  make: binary_decoder.binary_ppm_decoder(${samples_per_pulse}, ${samples_per_gap}, ${max_deviation})
+  make: binary_decoder.binary_ppm_decoder(${samples_per_pulse}, ${samples_per_gap}, ${max_deviation}, ${max_packet_length})
 
 parameters:
   - id: samples_per_pulse
@@ -16,6 +16,10 @@ parameters:
   - id: max_deviation
     label: Max Deviation
     dtype: int
+  - id: max_packet_length
+    label: Max Packet Length
+    dtype: int
+    default: 64
 
 inputs:
   - label: in
