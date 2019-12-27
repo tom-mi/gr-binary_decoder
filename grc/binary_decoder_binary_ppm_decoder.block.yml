@@ -1,43 +1,30 @@
 id: binary_decoder_binary_ppm_decoder
-label: binary_ppm_decoder
-category: '[binary_decoder]'
+label: Binary PPM Decoder
+category: '[Binary Decoder]'
 
 templates:
   imports: import binary_decoder
-  make: binary_decoder.binary_ppm_decoder(${samples_per_peak}, ${samples_per_gap}, ${20]}, ${max_deviation})
+  make: binary_decoder.binary_ppm_decoder(${samples_per_pulse}, ${samples_per_gap}, ${max_deviation})
 
-#  Make one 'parameters' list entry for every Parameter you want settable from the GUI.
-#     Sub-entries of dictionary:
-#     * id (makes the value accessible as \$keyname, e.g. in the make entry)
-#     * label
-#     * dtype 
 parameters:
-- id: ...
-  label: ...
-  dtype: ...
-- id: ...
-  label: ...
-  dtype: ...
+  - id: samples_per_pulse
+    label: Samples per Pulse
+    dtype: int
+  - id: samples_per_gap
+    label: Samples per Gap
+    dtype: raw
+  - id: max_deviation
+    label: Max Deviation
+    dtype: int
 
-#  Make one 'inputs' list entry per input. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * domain
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
 inputs:
-- label: ...
-  domain: ...
-  dtype: ...
-  vlen: ...
+  - label: in
+    dtype: byte
+    vlen: 1
 
-#  Make one 'outputs' list entry per output. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
-- label: ...
-  domain: ...
-  dtype: ... #!-- e.g. int, float, complex, byte, short, xxx_vector, ...--
+outputs:
+  - label: out
+    dtype: byte
+    vlen: 1
 
 file_format: 1
