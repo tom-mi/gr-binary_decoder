@@ -19,26 +19,84 @@
 # Boston, MA 02110-1301, USA.
 #
 
-
 import numpy
+import pmt
 from gnuradio import gr
+
 
 class binary_message_debug_sink(gr.basic_block):
     """
     docstring for block binary_message_debug_sink
     """
-    def __init__(self, output='hex'):
+
+    def __init__(self, output='pmt', binary_output='hex', bytes_per_sep=1):
         gr.basic_block.__init__(self,
-            name="binary_message_debug_sink",
-            in_sig=[<+numpy.float32+>, ],
-            out_sig=[<+numpy.float32+>, ])
+                                name="binary_message_debug_sink",
+                                in_sig=None,
+                                out_sig=None)
+        self.message_port_register_in(pmt.intern('in'))
+        self.message_port_register_in(pmt.intern('pdu_in'))
 
-    def forecast(self, noutput_items, ninput_items_required):
-        #setup size of input_items[i] for work call
-        for i in range(len(ninput_items_required)):
-            ninput_items_required[i] = noutput_items
+        if output in ['raw', 'python']:
+            self._printer = self._get_printer(output, bytes_per_sep)
+        else:
+            raise ValueError(f'Unknown output type {output}')
+        if binary_output in ['raw', 'python', 'hex']:
+            self._binary_printer = self._get_printer(binary_output, bytes_per_sep)
+        else:
+            raise ValueError(f'Unknown binary_output type {binary_output}')
 
-    def general_work(self, input_items, output_items):
-        output_items[0][:] = input_items[0]
-        consume(0, len(input_items[0]))        #self.consume_each(len(input_items[0]))
-        return len(output_items[0])
+        self.set_msg_handler(pmt.intern('in'), self._handle_message)
+        self.set_msg_handler(pmt.intern('pdu_in'), self._handle_pdu_message)
+
+    def _get_printer(self, type_, bytes_per_sep):
+        if type_ == 'raw':
+            return self._print_message_raw
+        elif type_ == 'python':
+            return self._print_message_python
+        elif type_ == 'hex':
+            return self._print_message_hex(bytes_per_sep)
+        else:
+            raise ValueError(f'Unknown output type {type_}')
+
+    def _handle_message(self, message):
+        if self._is_binary(message):
+            self._binary_printer(message)
+        else:
+            self._printer(message)
+
+    def _handle_pdu_message(self, message):
+        self._printer(message)
+
+    @staticmethod
+    def _is_binary_pdu(message):
+        if pmt.is_pair(message):
+            if pmt.is_dict(pmt.car(message)) and pmt.is_u8vector(pmt.cdr(message)):
+                return True
+        return False
+
+    @staticmethod
+    def _is_binary(message):
+        return pmt.is_u8vector(message)
+
+    @staticmethod
+    def _extract_binary_pdu_data(self, message):
+        return pmt.to_python(pmt.cdr(message))
+
+    @staticmethod
+    def _print_message_raw(message):
+        print(message)
+
+    @staticmethod
+    def _print_message_python(message):
+        print(pmt.to_python(message))
+
+    @staticmethod
+    def _print_message_hex(bytes_per_sep):
+        def handler(message):
+            decoded_message = pmt.to_python(message)
+            if type(decoded_message) != numpy.ndarray or decoded_message.dtype != numpy.uint8:
+                raise ValueError('Binary printer can only print arrays of uint8')
+            print(bytes.hex(decoded_message.tobytes(), ' ', bytes_per_sep=bytes_per_sep))
+
+        return handler

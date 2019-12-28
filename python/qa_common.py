@@ -33,3 +33,19 @@ class BinaryBaseTest(gr_unittest.TestCase):
             self.assertEqual(tag.offset, expected_tag.offset)
             self.assertEqual(pmt.symbol_to_string(tag.key), expected_tag.key)
             self.assertEqual(pmt.to_python(tag.value), expected_tag.value)
+
+
+class message_source(gr.basic_block):
+
+    def __init__(self, messages):
+        gr.basic_block.__init__(self,
+                                name="message_source",
+                                in_sig=None,
+                                out_sig=None)
+        self.message_port_register_out(pmt.intern('out'))
+        self.messages = messages
+
+    def start(self):
+        for message in self.messages:
+            self.message_port_pub(pmt.intern('out'), pmt.to_pmt(message))
+        return True
