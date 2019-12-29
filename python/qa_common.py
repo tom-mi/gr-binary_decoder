@@ -47,5 +47,5 @@ class message_source(gr.basic_block):
 
     def start(self):
         for message in self.messages:
-            self.message_port_pub(pmt.intern('out'), pmt.to_pmt(message))
+            self.message_port_pub(pmt.intern('out'), message)
         return True

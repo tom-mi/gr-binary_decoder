@@ -66,14 +66,14 @@ class binary_message_debug_sink(gr.basic_block):
             self._printer(message)
 
     def _handle_pdu_message(self, message):
-        self._printer(message)
-
-    @staticmethod
-    def _is_binary_pdu(message):
-        if pmt.is_pair(message):
-            if pmt.is_dict(pmt.car(message)) and pmt.is_u8vector(pmt.cdr(message)):
-                return True
-        return False
+        if not pmt.is_pair(message):
+            print('Invalid pdu: ', message)
+        else:
+            data = pmt.cdr(message)
+            if self._is_binary(data):
+                self._binary_printer(data)
+            else:
+                self._printer(data)
 
     @staticmethod
     def _is_binary(message):
