@@ -25,7 +25,7 @@ import time
 import numpy
 import pmt
 from gnuradio import gr_unittest
-from binary_message_debug_sink import binary_message_debug_sink
+from binary_message_debug_sink import binary_message_debug_sink, OutputType
 from qa_common import message_source, BinaryBaseTest
 
 
@@ -46,8 +46,8 @@ class qa_binary_message_debug_sink(BinaryBaseTest):
     def test_generic_output(self):
         messages = [pmt.to_pmt('foo'), pmt.to_pmt('bar'), pmt.to_pmt({'foo': [1, 2]})]
         for parameters, expected_output in [
-            (dict(output='raw'), 'foo\nbar\n((foo . #(1 2)))\n'),
-            (dict(output='python'), "foo\nbar\n{'foo': [1, 2]}\n"),
+            (dict(output=OutputType.RAW), 'foo\nbar\n((foo . #(1 2)))\n'),
+            (dict(output=OutputType.PYTHON), "foo\nbar\n{'foo': [1, 2]}\n"),
 
         ]:
             with self.subTest(parameters=parameters, expected_output=expected_output):
@@ -68,7 +68,8 @@ class qa_binary_message_debug_sink(BinaryBaseTest):
     def test_raw_binary_output(self):
         # some non-printable bytes cause problems in the test setup when printed raw
         # given
-        self._setup_graph([pmt.to_pmt(numpy.array([0x00, 0x01, 0x42, 0x70], dtype='uint8'))], binary_output='raw')
+        self._setup_graph([pmt.to_pmt(numpy.array([0x00, 0x01, 0x42, 0x70], dtype='uint8'))],
+                          binary_output=OutputType.RAW)
 
         # when
         out = io.StringIO()
@@ -81,10 +82,10 @@ class qa_binary_message_debug_sink(BinaryBaseTest):
     def test_binary_output(self):
         messages = [pmt.to_pmt(numpy.array([0, 1, 255, 4, 4, 5, 8, 9, 66, 42], dtype='uint8'))]
         for parameters, expected_output in [
-            (dict(binary_output='python'), "[  0   1 255   4   4   5   8   9  66  42]\n"),
-            (dict(binary_output='hex'), '00 01 ff 04 04 05 08 09 42 2a\n'),
-            (dict(binary_output='hex', bytes_per_sep=4), '0001 ff040405 0809422a\n'),
-            (dict(binary_output='hex', bytes_per_sep=-4), '0001ff04 04050809 422a\n'),
+            (dict(binary_output=OutputType.PYTHON), "[  0   1 255   4   4   5   8   9  66  42]\n"),
+            (dict(binary_output=OutputType.HEX), '00 01 ff 04 04 05 08 09 42 2a\n'),
+            (dict(binary_output=OutputType.HEX, bytes_per_sep=4), '0001 ff040405 0809422a\n'),
+            (dict(binary_output=OutputType.HEX, bytes_per_sep=-4), '0001ff04 04050809 422a\n'),
         ]:
             with self.subTest(f'{parameters} -> {expected_output}'):
                 # sub-tests don't call tearDown / setUp
@@ -106,10 +107,10 @@ class qa_binary_message_debug_sink(BinaryBaseTest):
             pmt.cons(pmt.PMT_NIL, pmt.to_pmt(numpy.array([0, 1, 255, 4, 4, 5, 8, 9, 66, 42], dtype='uint8'))),
         ]
         for parameters, expected_output in [
-            (dict(binary_output='python'), "[  0   1 255   4   4   5   8   9  66  42]\n"),
-            (dict(binary_output='hex'), '00 01 ff 04 04 05 08 09 42 2a\n'),
-            (dict(binary_output='hex', bytes_per_sep=4), '0001 ff040405 0809422a\n'),
-            (dict(binary_output='hex', bytes_per_sep=-4), '0001ff04 04050809 422a\n'),
+            (dict(binary_output=OutputType.PYTHON), "[  0   1 255   4   4   5   8   9  66  42]\n"),
+            (dict(binary_output=OutputType.HEX), '00 01 ff 04 04 05 08 09 42 2a\n'),
+            (dict(binary_output=OutputType.HEX, bytes_per_sep=4), '0001 ff040405 0809422a\n'),
+            (dict(binary_output=OutputType.HEX, bytes_per_sep=-4), '0001ff04 04050809 422a\n'),
         ]:
             with self.subTest(f'{parameters} -> {expected_output}'):
                 # sub-tests don't call tearDown / setUp
@@ -132,7 +133,8 @@ class qa_binary_message_debug_sink(BinaryBaseTest):
         self.tb.stop()
         self.tb.wait()
 
-    def _setup_graph(self, src_messages, pdu_in=False, output='raw', binary_output='hex', bytes_per_sep=1):
+    def _setup_graph(self, src_messages, pdu_in=False, output=OutputType.RAW, binary_output=OutputType.HEX,
+                     bytes_per_sep=1):
         src = message_source(src_messages)
         uut = binary_message_debug_sink(output=output, binary_output=binary_output, bytes_per_sep=bytes_per_sep)
         self.tb.msg_connect(src, 'out', uut, 'pdu_in' if pdu_in else 'in')

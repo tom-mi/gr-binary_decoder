@@ -1,43 +1,35 @@
 id: binary_decoder_binary_message_debug_sink
-label: binary_message_debug_sink
-category: '[binary_decoder]'
+label: Binary Message Debug Sink
+category: '[Binary Decoder]'
 
 templates:
   imports: import binary_decoder
-  make: binary_decoder.binary_message_debug_sink(${output})
+  make: binary_decoder.binary_message_debug_sink(${output}, ${binary_output}, ${bytes_per_sep})
 
-#  Make one 'parameters' list entry for every Parameter you want settable from the GUI.
-#     Sub-entries of dictionary:
-#     * id (makes the value accessible as \$keyname, e.g. in the make entry)
-#     * label
-#     * dtype 
 parameters:
-- id: ...
-  label: ...
-  dtype: ...
-- id: ...
-  label: ...
-  dtype: ...
+  - id: output
+    label: Output Format
+    dtype: enum
+    default: binary_decoder.OutputType.RAW
+    options: [binary_decoder.OutputType.RAW, binary_decoder.OutputType.PYTHON]
+    option_labels: [Raw PMT, Pythonic]
+  - id: binary_output
+    label: Binary Output Format
+    dtype: enum
+    default: binary_decoder.OutputType.HEX
+    options: [binary_decoder.OutputType.RAW, binary_decoder.OutputType.PYTHON, binary_decoder.OutputType.HEX]
+    option_labels: [Raw PMT, Pythonic, Hex]
+  - id: bytes_per_sep
+    label: Bytes per Separator
+    dtype: int
+    default: 1
 
-#  Make one 'inputs' list entry per input. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * domain
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
 inputs:
-- label: ...
-  domain: ...
-  dtype: ...
-  vlen: ...
-
-#  Make one 'outputs' list entry per output. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
-- label: ...
-  domain: ...
-  dtype: ... #!-- e.g. int, float, complex, byte, short, xxx_vector, ...--
+  - domain: message
+    id: in
+    optional: true
+  - domain: message
+    id: pdu_in
+    optional: true
 
 file_format: 1

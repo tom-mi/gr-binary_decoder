@@ -19,9 +19,17 @@
 # Boston, MA 02110-1301, USA.
 #
 
+import enum
+
 import numpy
 import pmt
 from gnuradio import gr
+
+
+class OutputType(enum.Enum):
+    RAW = 'raw'
+    PYTHON = 'python'
+    HEX = 'hex'
 
 
 class binary_message_debug_sink(gr.basic_block):
@@ -29,7 +37,7 @@ class binary_message_debug_sink(gr.basic_block):
     docstring for block binary_message_debug_sink
     """
 
-    def __init__(self, output='pmt', binary_output='hex', bytes_per_sep=1):
+    def __init__(self, output=OutputType.RAW, binary_output=OutputType.HEX, bytes_per_sep=1):
         gr.basic_block.__init__(self,
                                 name="binary_message_debug_sink",
                                 in_sig=None,
@@ -37,11 +45,11 @@ class binary_message_debug_sink(gr.basic_block):
         self.message_port_register_in(pmt.intern('in'))
         self.message_port_register_in(pmt.intern('pdu_in'))
 
-        if output in ['raw', 'python']:
+        if output in [OutputType.RAW, OutputType.PYTHON]:
             self._printer = self._get_printer(output, bytes_per_sep)
         else:
             raise ValueError(f'Unknown output type {output}')
-        if binary_output in ['raw', 'python', 'hex']:
+        if binary_output in [OutputType.RAW, OutputType.PYTHON, OutputType.HEX]:
             self._binary_printer = self._get_printer(binary_output, bytes_per_sep)
         else:
             raise ValueError(f'Unknown binary_output type {binary_output}')
@@ -50,11 +58,11 @@ class binary_message_debug_sink(gr.basic_block):
         self.set_msg_handler(pmt.intern('pdu_in'), self._handle_pdu_message)
 
     def _get_printer(self, type_, bytes_per_sep):
-        if type_ == 'raw':
+        if type_ == OutputType.RAW:
             return self._print_message_raw
-        elif type_ == 'python':
+        elif type_ == OutputType.PYTHON:
             return self._print_message_python
-        elif type_ == 'hex':
+        elif type_ == OutputType.HEX:
             return self._print_message_hex(bytes_per_sep)
         else:
             raise ValueError(f'Unknown output type {type_}')
