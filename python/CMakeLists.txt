@@ -35,7 +35,8 @@ GR_PYTHON_INSTALL(
     binary_tagger.py
     binary_symbol_sync.py
     binary_ppm_decoder.py
-    binary_message_debug_sink.py DESTINATION ${GR_PYTHON_DIR}/binary_decoder
+    binary_message_debug_sink.py
+    binary_message_processor.py DESTINATION ${GR_PYTHON_DIR}/binary_decoder
 )
 
 ########################################################################
@@ -49,3 +50,4 @@ GR_ADD_TEST(qa_binary_tagger ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa
 GR_ADD_TEST(qa_binary_symbol_sync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_symbol_sync.py)
 GR_ADD_TEST(qa_binary_ppm_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_ppm_decoder.py)
 GR_ADD_TEST(qa_binary_message_debug_sink ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_message_debug_sink.py)
+GR_ADD_TEST(qa_binary_message_processor ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_binary_message_processor.py)
