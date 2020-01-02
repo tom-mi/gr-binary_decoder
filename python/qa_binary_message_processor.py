@@ -18,7 +18,8 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 #
-
+import contextlib
+import io
 import time
 
 import numpy
@@ -146,6 +147,32 @@ class qa_binary_message_processor(BinaryBaseTest):
         # then
         self.assertMessages([pmt.to_pmt('foo'), pmt.to_pmt('bar')])
 
+    def test_local_import(self):
+        code = 'import struct\nreturn struct.unpack("xbx", message)[0]'
+        self._setup_graph([pmt.to_pmt(numpy.array([66, 24, 66], dtype='uint8'))], in_type=MessageType.PYTHON,
+                          out_type=MessageType.PYTHON, code=code)
+
+        # when
+        self._run()
+
+        # then
+        self.assertMessages([pmt.to_pmt(24)])
+
+    def test_no_connected_output(self):
+        # given
+        code = 'print(len(message))'
+        src = message_source([pmt.to_pmt('foobar')])
+        uut = binary_message_processor(in_type=MessageType.PYTHON, out_type=MessageType.PYTHON, code=code)
+        self.tb.msg_connect(src, 'out', uut, 'in')
+
+        # when
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self._run()
+
+        # then
+        self.assertEqual(out.getvalue(), '6\n')
+
     def assertMessages(self, expected_messages):
         expected_pythonic_messages = [pmt.to_python(message) for message in expected_messages]
         actual_pythonic_messages = [pmt.to_python(message) for message in self.dst.messages]
@@ -153,7 +180,7 @@ class qa_binary_message_processor(BinaryBaseTest):
 
     def _run(self):
         self.tb.start()
-        time.sleep(0.001)
+        time.sleep(0.01)
         self.tb.stop()
         self.tb.wait()
 

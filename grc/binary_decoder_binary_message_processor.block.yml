@@ -1,43 +1,36 @@
 id: binary_decoder_binary_message_processor
-label: binary_message_processor
-category: '[binary_decoder]'
+label: Binary Message Processor
+category: '[Binary Decoder]'
 
 templates:
   imports: import binary_decoder
   make: binary_decoder.binary_message_processor(${in_type}, ${out_type}, ${code})
 
-#  Make one 'parameters' list entry for every Parameter you want settable from the GUI.
-#     Sub-entries of dictionary:
-#     * id (makes the value accessible as \$keyname, e.g. in the make entry)
-#     * label
-#     * dtype 
 parameters:
-- id: ...
-  label: ...
-  dtype: ...
-- id: ...
-  label: ...
-  dtype: ...
+  - id: in_type
+    label: Input Type
+    dtype: enum
+    default: binary_decoder.MessageType
+    options: [binary_decoder.MessageType.RAW, binary_decoder.MessageType.PYTHON, binary_decoder.MessageType.PDU]
+    option_labels: [Raw PMT, Pythonic, PDU]
+  - id: out_type
+    label: Output Type
+    dtype: enum
+    default: binary_decoder.MessageType
+    options: [binary_decoder.MessageType.RAW, binary_decoder.MessageType.PYTHON, binary_decoder.MessageType.PDU]
+    option_labels: [Raw PMT, Pythonic, PDU]
+  - id: code
+    label: Code
+    dtype: _multiline
+    default: pass
 
-#  Make one 'inputs' list entry per input. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * domain
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
 inputs:
-- label: ...
-  domain: ...
-  dtype: ...
-  vlen: ...
+  - domain: message
+    id: in
 
-#  Make one 'outputs' list entry per output. Sub-entries of dictionary:
-#      * label (an identifier for the GUI)
-#      * dtype
-#      * vlen
-#      * optional (set to 1 for optional inputs) 
-- label: ...
-  domain: ...
-  dtype: ... #!-- e.g. int, float, complex, byte, short, xxx_vector, ...--
+outputs:
+  - domain: message
+    id: out
+    optional: true
 
 file_format: 1
