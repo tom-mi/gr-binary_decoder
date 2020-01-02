@@ -88,10 +88,6 @@ class binary_message_debug_sink(gr.basic_block):
         return pmt.is_u8vector(message)
 
     @staticmethod
-    def _extract_binary_pdu_data(self, message):
-        return pmt.to_python(pmt.cdr(message))
-
-    @staticmethod
     def _print_message_raw(message):
         print(message)
 

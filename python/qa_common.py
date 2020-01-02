@@ -49,3 +49,18 @@ class message_source(gr.basic_block):
         for message in self.messages:
             self.message_port_pub(pmt.intern('out'), message)
         return True
+
+
+class message_sink(gr.basic_block):
+
+    def __init__(self):
+        gr.basic_block.__init__(self,
+                                name="message_sink",
+                                in_sig=None,
+                                out_sig=None)
+        self.message_port_register_in(pmt.intern('in'))
+        self.set_msg_handler(pmt.intern('in'), self._handle_message)
+        self.messages = []
+
+    def _handle_message(self, message):
+        self.messages.append(message)
