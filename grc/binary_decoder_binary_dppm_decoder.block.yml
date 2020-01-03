@@ -1,10 +1,10 @@
-id: binary_decoder_binary_ppm_decoder
-label: Binary PPM Decoder
+id: binary_decoder_binary_dppm_decoder
+label: Binary DPPM Decoder
 category: '[Binary Decoder]'
 
 templates:
   imports: import binary_decoder
-  make: binary_decoder.binary_ppm_decoder(${samples_per_pulse}, ${samples_per_gap}, ${max_deviation}, ${max_packet_length})
+  make: binary_decoder.binary_dppm_decoder(${samples_per_pulse}, ${samples_per_gap}, ${max_deviation}, ${max_packet_length})
 
 parameters:
   - id: samples_per_pulse

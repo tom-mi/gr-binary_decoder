@@ -34,7 +34,7 @@ except ImportError:
 # import any pure python here
 from .binary_tagger import binary_tagger
 from .binary_symbol_sync import binary_symbol_sync
-from .binary_ppm_decoder import binary_ppm_decoder
+from .binary_dppm_decoder import binary_dppm_decoder
 from .binary_message_debug_sink import binary_message_debug_sink, OutputType
 from .binary_message_processor import binary_message_processor, MessageType
 #

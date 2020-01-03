@@ -30,14 +30,14 @@ from gnuradio import gr
 PACKET_LENGTH_TAG_KEY = 'packet_len'
 
 
-class binary_ppm_decoder(gr.basic_block):
+class binary_dppm_decoder(gr.basic_block):
     """
-    docstring for block binary_ppm_decoder
+    docstring for block binary_dppm_decoder
     """
 
     def __init__(self, samples_per_pulse=10, samples_per_gap=(10, 20), max_deviation=1, max_packet_length=64):
         gr.basic_block.__init__(self,
-                                name="binary_ppm_decoder",
+                                name="binary_dppm_decoder",
                                 in_sig=[numpy.int8, ],
                                 out_sig=[numpy.int8, ])
         self._samples_per_pulse = samples_per_pulse

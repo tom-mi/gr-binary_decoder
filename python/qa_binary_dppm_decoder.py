@@ -21,7 +21,7 @@
 
 from gnuradio import gr_unittest
 
-from binary_ppm_decoder import binary_ppm_decoder
+from binary_dppm_decoder import binary_dppm_decoder
 from qa_common import BinaryBaseTest, ExpectedTag
 
 PULSE = (1,) * 3
@@ -32,7 +32,7 @@ TRAILING_ZEROS = LONG_GAP + ZERO
 TRANSMISSION_BREAK = (0,) * 15
 
 
-class qa_binary_ppm_decoder(BinaryBaseTest):
+class qa_binary_dppm_decoder(BinaryBaseTest):
 
     def test_invalid_parameters_are_rejected(self):
         for parameters, message in [
@@ -54,7 +54,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
         ]:
             with self.subTest(f'{parameters} -> {message}'):
                 with self.assertRaises(ValueError) as error:
-                    binary_ppm_decoder(**parameters)
+                    binary_dppm_decoder(**parameters)
                 self.assertEqual(str(error.exception), message)
 
     def test_zeroes_only_yield_no_output(self):
@@ -238,7 +238,7 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
     def _setup_graph(self, src_data, samples_per_pulse=3, samples_per_gap=(5, 9),
                      max_deviation=0, max_packet_length=64):
-        uut = binary_ppm_decoder(
+        uut = binary_dppm_decoder(
             samples_per_pulse=samples_per_pulse,
             samples_per_gap=samples_per_gap,
             max_deviation=max_deviation,
@@ -248,4 +248,4 @@ class qa_binary_ppm_decoder(BinaryBaseTest):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_binary_ppm_decoder)
+    gr_unittest.run(qa_binary_dppm_decoder)
