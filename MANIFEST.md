@@ -1,13 +1,15 @@
 title: The BINARY_DECODER OOT Module
-brief: Short description of gr-binary_decoder
+brief: Decode simple binary signals encoded with OOK, PPM etc.
 tags: # Tags are arbitrary, but look at CGRAN what other authors are using
   - sdr
+  - ppm
+  - ook
 author:
-  - Author Name <authors@email.address>
+  - Thomas Reifenberger
 copyright_owner:
-  - Copyright Owner 1
+  - Thomas Reifenberger
 license:
-#repo: # Put the URL of the repository here, or leave blank for default
+repo: https://github.com/tom-mi/gr-binary_decoder
 #website: <module_website> # If you have a separate project website, put it here
 #icon: <icon_url> # Put a URL to a square image here that will be used as an icon on CGRAN
 ---
