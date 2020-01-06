@@ -6,8 +6,8 @@ These are simple, easy-to-use blocks that help decoding simple binary signals as
 remote controls or similar. They might not be the most sophisticated implementations, but they also don't require
 deep knowledge in signal processing to be configured and used.
 
-I wrote them while learning GnuRadio, to close the gap between "decoding by eyeball" as suggested in many tutorials
-to get a real end-to-end decoder.
+I wrote them while learning GnuRadio, to get from "decoding by eyeball" as suggested in many tutorials
+to a simple, but working end-to-end decoder.
 
 ## Prerequisites
 
